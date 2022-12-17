@@ -17,25 +17,59 @@ app.get("/test", (req, res) => {
 app.listen(Port, () => {
   console.log(`app is listening on port :${Port}`);
 });
+//middlware function to generate tokens
+const generateToken= async(req,res,next)=>
+//getting the  auth ..by encoding both sonsumer key and 
+{
+    await axios.get("",{
+        headers:{
+            authorization:`Basic ${auth}`
+        }
+    })
+}
 app.post("/stk", async (req, res) => {
-  const phone = req.body.phone;
+  const phone = req.body.phone.substring(1);
   const amount = req.body.amount;
   res.json({ phone, amount });
+//timestamp
+const date=new Date();
+const timeStamp=date.getFullYear()+
+("0" + (date.getMonth() +1)).slice(-2) +
+("0" + (date.getDate() +1)).slice(-2) +
+("0" + (date.getHours() +1)).slice(-2) +
+("0" + (date.getMinutes() +1)).slice(-2) +
+("0" + (date.getSeconds() +1)).slice(-2) ;
+
+const shortCode=process.env.MPESA_PAYBILL
+const passKey=process.env.MPESA_PASSKEY
+
+//(The base64 string is a combination of Shortcode+Passkey+Timestamp)
+const password=new Buffer.from(shortCode + passKey +timeStamp).toString('base64');
+
+
   await axios.post(
     "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
     {
-      BusinessShortCode: "174379",
+      BusinessShortCode:shortCode,
       Password:
-        "MTc0Mzc5YmZiMjc5ZjlhYTliZGJjZjE1OGU5N2RkNzFhNDY3Y2QyZTBjODkzMDU5YjEwZjc4ZTZiNzJhZGExZWQyYzkxOTIwMTYwMjE2MTY1NjI3",
-      Timestamp: "20160216165627",
-      TransactionType: "CustomerPayBillOnline",
-      Amount: "1",
-      PartyA: "254708374149",
-      PartyB: "174379",
+        password,
+      Timestamp: timeStamp ,
+      TransactionType: "CustomerPayBillOnline",//"CustomerBuyGoodsOnline"
+      Amount:amount,
+      PartyA: `254${phone}`,
+      PartyB: shortCode,
       PhoneNumber: "254708374149",
       CallBackURL: "https://mydomain.com/pat",
       AccountReference: "Test",
       TransactionDesc: "Test",
+    },{
+        headers:`Bearer ${  token}`
     }
-  );
+  ).then((data)=>{
+    console.log(data);
+    res.status(200).json(data)
+  }).catch((err)=>{
+    console.log(err.message);
+    res.status(400).json(err.message)
+  })
 });
