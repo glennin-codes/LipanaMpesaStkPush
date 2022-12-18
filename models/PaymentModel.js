@@ -1,5 +1,6 @@
 const mongoose =require('mongoose')
-const PaymentSchema=new mongoose.Schema({
+const {Schema}=require('mongoose')
+const PaymentSchema = new Schema({
     number:{
         type:String,
         required:true

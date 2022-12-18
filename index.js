@@ -85,7 +85,7 @@ app.post("/stk", async (req, res) => {
         PhoneNumber: "254708374149",
         CallBackURL: " https://2b28-154-122-138-177.eu.ngrok.io/callback",
         AccountReference: `254${phone}`,
-        TransactionDesc: "fee payment recieved ",
+        TransactionDesc: "fee payment recieved",
       },
       {
         headers: `Bearer ${token}`,
@@ -102,6 +102,12 @@ app.post("/stk", async (req, res) => {
 });
 
 app.post('/callback',(req,res)=>{
-    const callBackData=req.body.value
+    const callBackData=req.body
+    if(!callBackData.Body.stkCallback.CallbackMetadata){
+        console.log(callBackData.Body);
+    }
+    const phone=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
+    const amount=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
+    const trnx_id=callBackData.Body.stkCallback.CallbackMetadata.Item[1].Value
 
 })
