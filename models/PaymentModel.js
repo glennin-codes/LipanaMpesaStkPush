@@ -1,13 +1,17 @@
 const mongoose =require('mongoose')
 const {Schema}=require('mongoose')
 const PaymentSchema = new Schema({
-    number:{
+    PhoneNumber:{
         type:String,
         required:true
     },
     trnx_id:{
         type:String,
-        required:true}
+        required:true},
+    amount:{
+        type:String,
+        require:true
+    }
     
 },{timestamps:true}
 );

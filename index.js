@@ -3,7 +3,8 @@ const cors = require("cors");
 const app = express();
 const axios = require("axios");
 const { response } = require("express");
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const PaymentModule = require("./models/PaymentModel");
 require("dotenv").config();
 
 //middlewares
@@ -102,12 +103,22 @@ app.post("/stk", async (req, res) => {
 });
 
 app.post('/callback',(req,res)=>{
+   
     const callBackData=req.body
     if(!callBackData.Body.stkCallback.CallbackMetadata){
-        console.log(callBackData.Body);
+        console.log(callBackData.Body.stkCallback.ResultDesc);
+       return  res.json(callBackData.Body.stkCallback.ResultDesc)
     }
     const phone=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
-    const amount=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
+    const amount=callBackData.Body.stkCallback.CallbackMetadata.Item[0].Value
     const trnx_id=callBackData.Body.stkCallback.CallbackMetadata.Item[1].Value
-
+console.log({phone,amount,trnx_id});
+  PaymentModule.PhoneNumber= phone
+  PaymentModule.amount= amount
+  PaymentModule.trnx_id=trnx_id
+  PaymentModule.save().then((data)=>{
+    console.log({message:"Saved Succefully",data}).catch((err)=>{
+      console.log(err.message);
+    })
+  })
 })
