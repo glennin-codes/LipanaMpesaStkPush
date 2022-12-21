@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const axios = require("axios");
 const mongoose = require('mongoose');
 const PaymentModule = require("./models/PaymentModel");
 const Payee= require("./routes/Routes");
@@ -14,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const Port = 5000;
 
-app.use('/stk',Payee)
+
 
 mongoose.connect(process.env.MONGO_URL).then(()=>{
     console.log('connected to Db succefull');
@@ -37,20 +36,23 @@ app.listen(Port, () => {
 app.post('/callback',(req,res)=>{
    
     const callBackData=req.body
-    if(!callBackData.Body.stkCallback.CallbackMetadata){
-        console.log(callBackData.Body.stkCallback.ResultDesc);
-       return  res.json(callBackData.Body.stkCallback.ResultDesc)
-    }
-    const phone=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
-    const amount=callBackData.Body.stkCallback.CallbackMetadata.Item[0].Value
-    const trnx_id=callBackData.Body.stkCallback.CallbackMetadata.Item[1].Value
-console.log({phone,amount,trnx_id});
-  PaymentModule.PhoneNumber= phone
-  PaymentModule.amount= amount
-  PaymentModule.trnx_id=trnx_id
-  PaymentModule.save().then((data)=>{
-    console.log({message:"Saved Succefully",data}).catch((err)=>{
-      console.log(err.message);
-    })
-  })
+    console.log(callBackData);
+//     if(!callBackData.Body.stkcallback.CallbackMetadata){
+//         console.log(callBackData.Body.stkCallback.ResultDesc);
+//        return  res.json(callBackData.Body.stkCallback.ResultDesc)
+//     }
+//     const phone=callBackData.Body.stkCallback.CallbackMetadata.Item[4].Value
+//     const amount=callBackData.Body.stkCallback.CallbackMetadata.Item[0].Value
+//     const trnx_id=callBackData.Body.stkCallback.CallbackMetadata.Item[1].Value
+// console.log({phone,amount,trnx_id});
+//   PaymentModule.PhoneNumber= phone
+//   PaymentModule.amount= amount
+//   PaymentModule.trnx_id=trnx_id
+//   PaymentModule.save()
+// .then((data)=>{
+//     console.log({message:"Saved Succefully",data}).catch((err)=>{
+//       console.log(err.message);
+//     })
+//   })
 })
+app.use('/stk',Payee)

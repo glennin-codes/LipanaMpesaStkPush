@@ -1,5 +1,5 @@
 const  axios =require("axios") ;
-const dotenv=require('dotenv').config
+require("dotenv").config();
 const CreateToken=async(req,res,next)=>{
       //getting the  auth ..by encoding both consumer key and consumerSecret
   
@@ -18,20 +18,14 @@ const auth  = new Buffer.from(`${consumerKey}:${secret}`).toString(
     }).then((data)=>{
         console.log(data.data.access_token);
         token=data.data.access_token
-        next()
+        next();
     }).catch((err)=>{
         console.log(err.message);
-    }).then((data) => {
-        console.log(data.data);
-        res.status(200).json(data.data);
-      })
-      .catch((err) => {
-        console.error(err.message);
-        res.status(400).json(err.message);
-      });
+    })
+     
   };
 
-const stkpush=async(req,res)=>{
+const stkPush=async(req,res)=>{
     const phone = req.body.phone.substring(1);
     const amount = req.body.amount;
     // res.json({ phone, amount });
@@ -57,24 +51,29 @@ const stkpush=async(req,res)=>{
   const Data={
     BusinessShortCode: shortCode,
     Password:password,
-    Timestamp: '20160216165627',
+    Timestamp: timeStamp,
     TransactionType: "CustomerPayBillOnline", //"CustomerBuyGoodsOnline"
     Amount: amount,
     PartyA: `254${phone}`,
     PartyB: shortCode,
     PhoneNumber: `254${phone}`,
-    CallBackURL: "https://52ba-102-68-78-191.in.ngrok.io/callback",
+    CallBackURL: "https://fdda-154-122-161-9.eu.ngrok.io/callback",
     AccountReference: `254${phone}`,
     TransactionDesc: "fee payment",
   }
   await axios
-  .post(Url,Data,{ 
-        
+  .post(Url,Data,{      
     headers: {
       authorization: `Bearer ${token}`,
     },
-  })
+  }).then((data) => {
+    console.log(data.data);
+    res.status(200).json(data.data);
+  }) .catch((err) => {
+    console.log(err);
+    res.status(400).json(err.message);
+  });
 }
 
 
-module.exports={CreateToken ,stkpush}
+module.exports={CreateToken ,stkPush}
