@@ -1,5 +1,6 @@
 const  axios =require("axios") ;
 require("dotenv").config();
+const PaymentModule = require('../models/PaymentModel')
 const CreateToken=async(req,res,next)=>{
       //getting the  auth ..by encoding both consumer key and consumerSecret
   
@@ -57,7 +58,7 @@ const stkPush=async(req,res)=>{
     PartyA: `254${phone}`,
     PartyB: shortCode,
     PhoneNumber: `254${phone}`,
-    CallBackURL: "https://fdda-154-122-161-9.eu.ngrok.io/callback",
+    CallBackURL: "https://fdda-154-122-161-9.eu.ngrok.io/stk/callback",
     AccountReference: `254${phone}`,
     TransactionDesc: "fee payment",
   }
@@ -66,14 +67,35 @@ const stkPush=async(req,res)=>{
     headers: {
       authorization: `Bearer ${token}`,
     },
-  }).then((data) => {
-    console.log(data.data);
-    res.status(200).json(data.data);
+  }).then((response) => {
+    console.log(response.data);
+    res.status(200).json(response.data);
   }) .catch((err) => {
     console.log(err);
     res.status(400).json(err.message);
   });
 }
+const callBack=async(req,res)=>{
+   
+    const  callbackData =req.body;
+    console.log( callbackData);
+    if(! callbackData.Body.stkCallback.CallbackMetadata){
+        console.log( callbackData.Body.stkCallback.ResultDesc);
+       return  res.json( 'ok')
+    }
+    const phone= callbackData.Body.stkCallback.CallbackMetadata.Item[4].Value
+    const amount= callbackData.Body.stkCallback.CallbackMetadata.Item[0].Value
+    const trnx_id= callbackData.Body.stkCallback.CallbackMetadata.Item[1].Value
+console.log({phone,amount,trnx_id});
+  PaymentModule.PhoneNumber= phone
+  PaymentModule.amount= amount
+  PaymentModule.trnx_id=trnx_id
+  PaymentModule.save()
+.then((data)=>{
+    console.log({message:"Saved Succefully",data}).catch((err)=>{
+      console.log(err.message);
+    })
 
+})}
 
-module.exports={CreateToken ,stkPush}
+module.exports={CreateToken ,stkPush,callBack}
