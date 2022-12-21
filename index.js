@@ -2,9 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const axios = require("axios");
-const { response } = require("express");
 const mongoose = require('mongoose');
 const PaymentModule = require("./models/PaymentModel");
+const Payee= require("./routes/Routes");
 require("dotenv").config();
 
 //middlewares
@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const Port = 5000;
+
+app.use('/stk',Payee)
 
 mongoose.connect(process.env.MONGO_URL).then(()=>{
     console.log('connected to Db succefull');
@@ -26,74 +28,11 @@ app.get("/test", (req, res) => {
 app.listen(Port, () => {
   console.log(`app is listening on port :${Port}`);
 });
-//middlware function to generate token
-const generateToken = async (req, res, next) =>
 
 
-    await axios.get("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", { 
-        
-      headers: {
-        authorization: `Basic ${auth}`,
-      },
-    }).then((response)=>{
-        token =response.data.access_token
-        next()
-    }).catch((err)=>{
-        console.log(err.message);
-    })
-  };
-  //processing api request
-app.post("/stk",generateToken, async (req, res) => {
-  const phone = req.body.phone.substring(1);
-  const amount = req.body.amount;
-  // res.json({ phone, amount });
-  //timestamp
-  const date = new Date();
-  const timeStamp =
-    date.getFullYear() +
-    ("0" + (date.getMonth() + 1)).slice(-2) +
-    ("0" + (date.getDate() + 1)).slice(-2) +
-    ("0" + (date.getHours() + 1)).slice(-2) +
-    ("0" + (date.getMinutes() + 1)).slice(-2) +
-    ("0" + (date.getSeconds() + 1)).slice(-2);
 
-  const shortCode = process.env.MPESA_PAYBILL;
-  const passKey = process.env.MPESA_PASSKEY;
-
-  //(The base64 string is a combination of Shortcode+Passkey+Timestamp)
-  const password = new Buffer.from(shortCode + passKey + timeStamp).toString(
-    "base64"
-  );
-
-  await axios
-    .post(
-      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-      {
-        BusinessShortCode: '174379',
-        Password: "MTc0Mzc5YmZiMjc5ZjlhYTliZGJjZjE1OGU5N2RkNzFhNDY3Y2QyZTBjODkzMDU5YjEwZjc4ZTZiNzJhZGExZWQyYzkxOTIwMTYwMjE2MTY1NjI3",
-        Timestamp: '20160216165627',
-        TransactionType: "CustomerPayBillOnline", //"CustomerBuyGoodsOnline"
-        Amount: amount,
-        PartyA: `254${phone}`,
-        PartyB: '174379',
-        PhoneNumber: `254${phone}`,
-        CallBackURL: "https://52ba-102-68-78-191.in.ngrok.io/callback",
-        AccountReference: `254${phone}`,
-        TransactionDesc: "fee payment",
-      },
-      {
-        headers: `Bearer ${token}`,
-      }
-    )
-    .then((data) => {
-      console.log(data.data);
-      res.status(200).json(data.data);
-    })
-    .catch((err) => {
-      console.error(err.message);
-      res.status(400).json(err.message);
-    });
-});
+    
+  
 
 app.post('/callback',(req,res)=>{
    
