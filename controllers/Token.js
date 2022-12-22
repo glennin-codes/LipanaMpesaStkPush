@@ -58,7 +58,7 @@ const stkPush=async(req,res)=>{
     PartyA: `254${phone}`,
     PartyB: shortCode,
     PhoneNumber: `254${phone}`,
-    CallBackURL: "https://fdda-154-122-161-9.eu.ngrok.io/stk/callback",
+    CallBackURL: "https://motorstk.onrender.com/stk/callback",
     AccountReference: `254${phone}`,
     TransactionDesc: "fee payment",
   }
